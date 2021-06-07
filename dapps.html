@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartcontract</title>
+</head>
+
+<body>
+
+    <h1>
+        スマートコントラクト
+    </h1>
+
+    <p>送信者:</p>
+    <p id="sender"></p>>
+
+    <form id="form">
+        <input type="text" id="message" />
+        <input type="submit" value="送信" />
+    </form>
+
+    <p id="latest">
+    </p>
+
+    <ol id="list">
+    </ol>
+
+    <script>
+
+        const address = "0x83326f350E128918c9c337ee529AaBA227513662";
+        const abi = [
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "newMessage",
+                        "type": "string"
+                    }
+                ],
+                "name": "setMessage",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "message",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+
+        let account;
+        let contract;
+
+        window.addEventListener("load", () => {
+            window.web3.eth.getAccounts((error, result) => {
+                account = result[0];
+                contract = window.web3.eth.contract(abi).at(address);
+
+                const sender = document.getElementById("sender");
+                sender.innerText = address;
+
+                contract.message.call({ from: account }, (error, result) => {
+                    const latest = document.getElementById("latest");
+                    latest.innerText = result;
+                });
+            });
+        });
+
+        const form = document.getElementById("form");
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const message = document.getElementById("message");
+            const latest = document.getElementById("latest");
+
+            latest.innerHTML = message.value;
+
+            const list = document.getElementById("list");
+            list.innerHTML = list.innerHTML + "<li>" + message.value + "</li>";
+
+            contract.setMessage.sendTransaction(
+                message.value,
+                {
+                    from: account,
+                    gas: 300000,
+                    gasPrice: 210000000,
+                },
+                () => { }
+            );
+        });
+    </script>
+
+</body>
+
+</html>
